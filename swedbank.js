@@ -40,7 +40,6 @@ var swedbank = {
 			}
 
 			if (text.length > 0) {
-				console.log(text);
 				headers.push(text);
 			}
 		}
@@ -141,7 +140,6 @@ var swedbank = {
 
 				var bb = new WebKitBlobBuilder();
 				bb.append(swedbank.data);
-				console.log(swedbank.data)
 				fileWriter.write(bb.getBlob("text/plain"));
 
 				location.href = fileEntry.toURL();
