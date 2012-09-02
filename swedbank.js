@@ -3,8 +3,8 @@ var swedbank = {
 	extention: "",
 	filename: "",
 	init: function () {
-		var section = document.querySelectorAll(".sidspalt2a .sektion");
-		this.parse(section[section.length-1]);
+		var section = document.querySelector(".sidspalt2a .sektion");
+		this.parse(section);
 	},
 	parse: function(data) {
 		var raw_filename = data.querySelector(".sektion-huvud h3").innerHTML;
@@ -14,21 +14,33 @@ var swedbank = {
 			filename = "swedbank";
 		}
 
-		var raw_headers = data.querySelectorAll(".sektion-innehall2 .tabell th.tabell-huvud span.tabell-kolumnrubrik");
+		data = data.querySelectorAll(".sektion-innehall2 .tabell");
+		data = data[data.length-1];
+		var raw_headers = data.querySelectorAll("th.tabell-huvud span.tabell-kolumnrubrik");
 		var headers = [];
 		for (var k in raw_headers) {
-			var item = raw_headers[k];
+			var header = raw_headers[k];
 
-			if (item.innerHTML == undefined) {
+			if (typeof header.innerHTML == 'undefined') {
 				continue;
 			}
 			
-			if (item.innerHTML.match(/\<a href/)) {
-				item = item.querySelector("a");
+			if (header.innerHTML.match(/\<a href/)) {
+				header = header.querySelector("a");
 			}
 
-			var text = item.innerText.replace(/^\s+|\s+$/g, "");
+			var text = "";
+			if (typeof header.innerText != 'undefined') {
+				text = header.innerText.replace(/^\s+|\s+$/g, "");
+			}
+			else {
+				text = header.innerHTML.replace(/^\s+|\s+$/g, "");
+				// remove the <img tags && " " that are comming with ff.
+				text = text.replace(/\<img[^\>]*./g, "").replace("&nbsp;", "");
+			}
+
 			if (text.length > 0) {
+				console.log(text);
 				headers.push(text);
 			}
 		}
@@ -45,7 +57,7 @@ var swedbank = {
 			for (var key in raw_row) {
 				var coll = raw_row[key];
 
-				if (coll == null || coll.innerHTML == undefined) {
+				if (coll == null || typeof coll.innerHTML == 'undefined') {
 					continue;
 				}
 
@@ -53,7 +65,15 @@ var swedbank = {
 					coll = coll.querySelector("span");
 				}
 
-				var text = coll.innerText.replace(/^\s+|\s+$/g, "").replace(",",".");
+				var text = "";
+				if (typeof coll.innerText != 'undefined') {
+					text = coll.innerText.replace(/^\s+|\s+$/g, "").replace(",",".");
+				}
+				else {
+					text = coll.innerHTML.replace(/^\s+|\s+$/g, "").replace(",",".");
+					text = text.replace("&nbsp;", "");
+				}
+
 				if (text.length > 0) {
 					row.push(text);
 				}
@@ -95,7 +115,7 @@ var swedbank = {
 		this.extention = extention;
 		this.filename = filename;
 
-		if (typeof window.FileReader == 'undefined') {
+		if (typeof window.webkitStorageInfo == 'undefined') {
 			// Show popup with download link & textarea with csv data.
 			location.href = "data:application/octet-stream,"+encodeURIComponent(data);
 			return;
