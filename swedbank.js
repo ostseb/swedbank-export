@@ -123,8 +123,8 @@ var swedbank = {
 		window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
 		window.resolveLocalFileSystemURL = window.resolveLocalFileSystemURL || window.webkitResolveLocalFileSystemURL;
 
-		window.webkitStorageInfo.requestQuota(window.PERSISTENT, 50000, function(grantedBytes) {
-			window.requestFileSystem(window.PERSISTENT, grantedBytes, swedbank.onInitFs, swedbank.errorHandler);
+		window.webkitStorageInfo.requestQuota(window.TEMPORARY, 50000, function(grantedBytes) {
+			window.requestFileSystem(window.TEMPORARY, grantedBytes, swedbank.onInitFs, swedbank.errorHandler);
 		}, swedbank.errorHandler);
 
 		window.resolveLocalFileSystemURL(url, function(fileEntry) {
