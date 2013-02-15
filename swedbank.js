@@ -81,32 +81,28 @@ var swedbank = {
 		}
 		this.tocsv(filename, headers, rows);
 	},
-	tocsv: function(filename, headers, array) {
-		var csv = "";
+	tocsv: function(filename, headers, rows) {
+		var csv;
 
-		for (var i=0;i<headers.length;i++) {
-			csv += headers[i]+",";
-
-			if (i == headers.length-1) {
-				csv = csv.substr(0, csv.length-1);
+		function csvColumn(col) {
+			// Date columns get the full year specified
+			if (col.match(/^\d\d\-\d\d\-\d\d$/)) {
+				// FIXME Breaks when the data isn't from current century!
+				return (new Date()).getFullYear().toString().substring(0, 2) + col;
 			}
+			// Money columns get their spaces stripped
+			if (col.match(/^-?[\d\. ]+$/)) {
+				return col.replace(' ', '');
+			}
+			return '"' + col.replace('"', '"""') + '"';
 		}
-		csv += "\n";
 
-		for (var i=0;i<array.length;i++) {
-			for (var c=0;c<array[i].length;c++) {
-				csv += array[i][c]+",";
-
-				if (c == array[i].length-1) {
-					csv = csv.substr(0, csv.length-1);
-				}
-			}
-			csv += "\n";
-
-			if (i == array.length-1) {
-				csv = csv.substr(0, csv.length-2);
-			}
+		function csvRow(row) {
+			return row.map(csvColumn).join('\t') + '\n';
 		}
+
+		csv  = csvRow(headers);
+		csv += rows.map(csvRow).join('');
 		this.download(filename, "csv", csv);
 	},
 	download: function(filename, extension, data) {
