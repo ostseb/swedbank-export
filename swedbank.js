@@ -1,6 +1,6 @@
 var swedbank = {
 	data: "",
-	extention: "",
+	extension: "",
 	filename: "",
 	init: function () {
 		var section = document.querySelector(".sidspalt2a .sektion");
@@ -109,46 +109,25 @@ var swedbank = {
 		}
 		this.download(filename, "csv", csv);
 	},
-	download: function(filename, extention, data) {
+	download: function(filename, extension, data) {
 		this.data = data;
-		this.extention = extention;
+		this.extension = extension;
 		this.filename = filename;
 
-		if (typeof window.webkitStorageInfo == 'undefined') {
-			// Show popup with download link & textarea with csv data.
-			location.href = "data:application/octet-stream,"+encodeURIComponent(data);
-			return;
-		}
+		// Blob URL
+		var blob = new Blob([data], {type: 'text/csv'});
+		var url = URL.createObjectURL(blob);
+		console.log('URL to generated CSV:', url);
 
-		window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
-		window.resolveLocalFileSystemURL = window.resolveLocalFileSystemURL || window.webkitResolveLocalFileSystemURL;
-
-		window.webkitStorageInfo.requestQuota(window.TEMPORARY, 50000, function(grantedBytes) {
-			window.requestFileSystem(window.TEMPORARY, grantedBytes, swedbank.onInitFs, swedbank.errorHandler);
-		}, swedbank.errorHandler);
-
-		window.resolveLocalFileSystemURL(url, function(fileEntry) {
-			// Downloading...
-		}, swedbank.errorHandler);
-
-	},
-	onInitFs: function (fs) {
-
-		fs.root.getFile(swedbank.filename+"."+swedbank.extention, {create:true}, function(fileEntry) {
-
-			fileEntry.createWriter(function(fileWriter) {
-
-				var bb = new WebKitBlobBuilder();
-				bb.append(swedbank.data);
-				fileWriter.write(bb.getBlob("text/plain"));
-
-				location.href = fileEntry.toURL();
-
-			}, swedbank.errorHandler);
-		}, swedbank.errorHandler);
-	},
-	errorHandler: function(e) {
-		console.log(e);	
+		// Download UI
+		var section = document.querySelector('.sektion .sektion-innehall2');
+		var a = document.createElement('a');
+		var p = document.createElement('p');
+		a.href = url;
+		a.download = filename + '.' + extension;
+		a.innerHTML = 'Ladda ned CSV';
+		p.appendChild(a);
+		section.insertBefore(p, section.firstChild);
 	}
 };
 
